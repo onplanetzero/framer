@@ -1,0 +1,30 @@
+{
+  "name": "impose",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "impose": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "rm -rf dist/ && swc src/ -d dist --strip-leading-paths",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.11.0",
+  "dependencies": {
+    "@apidevtools/swagger-parser": "^10.1.1",
+    "commander": "^13.1.0",
+    "figlet": "^1.8.1",
+    "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21",
+    "prettier": "^3.5.3"
+  },
+  "devDependencies": {
+    "@swc/cli": "^0.7.7",
+    "@swc/core": "^1.11.24",
+    "chokidar": "^4.0.3"
+  }
+}
