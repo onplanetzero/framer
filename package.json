@@ -1,10 +1,10 @@
 {
-  "name": "impose",
+  "name": "framer",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "bin": {
-    "impose": "./dist/index.js"
+    "framer": "./dist/index.js"
   },
   "scripts": {
     "build": "rm -rf dist/ && swc src/ -d dist --strip-leading-paths",
@@ -23,6 +23,7 @@
     "prettier": "^3.5.3"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.0.0",
     "@swc/cli": "^0.7.7",
     "@swc/core": "^1.11.24",
     "chokidar": "^4.0.3"
