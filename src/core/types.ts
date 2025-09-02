@@ -64,22 +64,8 @@ export interface TypeDef {
     required?: string[]
 }
 
-export interface OpenAPIRequestBody {
-    description?: string
-    content: Record<SupportedDataFormat, OpenDocumentContainer>
-}
-
-export interface OpenDocumentContainer {
-    schema: Schema
-}
-
 export enum SupportedDataFormat {
     json = 'application/json',
     xml = 'application/xml',
     formUrlEncoded = 'application/x-www-form-url-encoded'
-}
-
-export interface OpenAPIResponse {
-    description: string
-    content: Record<SupportedDataFormat, OpenDocumentContainer>
 }

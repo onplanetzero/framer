@@ -29,7 +29,6 @@ export class TypeGenerator extends Generator {
     addContext = (): ProcessorContext => {
         const schema: Document = this.getSchema();
 
-        console.log(schema)
         const paths: PathsObject = schema.paths,
             schemas = schema.components.schemas;
 
