@@ -9,8 +9,10 @@
   "scripts": {
     "build": "rm -rf dist/ && swc src/ -d dist --strip-leading-paths",
     "test": "jest",
-    "check-types": "tsc --noEmit",
-    "lint": "eslint"
+    "types": "tsc --noEmit",
+    "lint": "eslint --fix",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check resources/"
   },
   "keywords": [],
   "author": "",

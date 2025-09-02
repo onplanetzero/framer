@@ -1,8 +1,14 @@
-import { Generator } from './generator';
-import path from 'path';
-import _ from 'lodash';
-import { getTypesFromSchema, decorateWithLookupTypes, getStaticTypes, generatePropertyDefinition, getEnumValues } from '../util/types';
-import { writeFileHeader } from '../util/file';
+import { Generator } from "./generator";
+import path from "path";
+import _ from "lodash";
+import {
+    getTypesFromSchema,
+    decorateWithLookupTypes,
+    getStaticTypes,
+    generatePropertyDefinition,
+    getEnumValues,
+} from "../util/types";
+import { writeFileHeader } from "../util/file";
 import {
     GeneratorTarget,
     type ProcessorContext,
@@ -16,14 +22,14 @@ import {
     type ResponsesObject,
     type ResponseObject,
     type TypeDef,
-    SupportedDataFormat
-} from '../core/types'
+    SupportedDataFormat,
+} from "../core/types";
 
 export class TypeGenerator extends Generator {
-    name = 'types';
+    name = "types";
     target = GeneratorTarget.SingleFile;
-    targetLocation = path.resolve(process.cwd(), './generated');
-    targetName = 'types.ts';
+    targetLocation = path.resolve(process.cwd(), "./generated");
+    targetName = "types.ts";
 
     addContext = (): ProcessorContext => {
         const schema: Document = this.getSchema();
@@ -38,18 +44,20 @@ export class TypeGenerator extends Generator {
             decoratedResponseTypes: Record<string, Schema> = {};
 
         const topLevelSchemaKeys: string[] = _.keys(schemas);
-        _.map(topLevelSchemaKeys, schemaName => {
-            types[schemaName] = schemas[schemaName]
+        _.map(topLevelSchemaKeys, (schemaName) => {
+            types[schemaName] = schemas[schemaName];
             stringifiedTypes[schemaName] = JSON.stringify(schemas[schemaName]);
         });
 
-        _.map(topLevelSchemaKeys, schemaName => {
-            types[schemaName] = decorateWithLookupTypes(types[schemaName], stringifiedTypes);
+        _.map(topLevelSchemaKeys, (schemaName) => {
+            types[schemaName] = decorateWithLookupTypes(
+                types[schemaName],
+                stringifiedTypes,
+            );
         });
 
         const stringifiedTypeSchemas: string[] = _.values(stringifiedTypes),
             stringifiedTypeSchemaNames: string[] = _.keys(stringifiedTypes);
-
 
         for (const url in paths) {
             const path: PathItemObject = paths[url];
@@ -59,7 +67,8 @@ export class TypeGenerator extends Generator {
                     operationResponses: ResponsesObject = operation.responses;
 
                 for (const statusCode in operationResponses) {
-                    const response: ResponseObject = operationResponses[statusCode];
+                    const response: ResponseObject =
+                        operationResponses[statusCode];
                     if (response.content === undefined) {
                         continue;
                     }
@@ -74,11 +83,21 @@ export class TypeGenerator extends Generator {
                         continue;
                     }
 
-                    const schemaIndex: number = _.findIndex(stringifiedTypeSchemas, str => str === JSON.stringify(mediaObject.schema));
+                    const schemaIndex: number = _.findIndex(
+                        stringifiedTypeSchemas,
+                        (str) => str === JSON.stringify(mediaObject.schema),
+                    );
                     if (schemaIndex > -1) {
-                        const foundSchemaDef: Schema = response.content[SupportedDataFormat.json].schema;
-                        responses[stringifiedTypeSchemaNames[schemaIndex]] = foundSchemaDef;
-                        decoratedResponseTypes[stringifiedTypeSchemaNames[schemaIndex]] = decorateWithLookupTypes(foundSchemaDef, stringifiedTypes);
+                        const foundSchemaDef: Schema =
+                            response.content[SupportedDataFormat.json].schema;
+                        responses[stringifiedTypeSchemaNames[schemaIndex]] =
+                            foundSchemaDef;
+                        decoratedResponseTypes[
+                            stringifiedTypeSchemaNames[schemaIndex]
+                        ] = decorateWithLookupTypes(
+                            foundSchemaDef,
+                            stringifiedTypes,
+                        );
                     }
                 }
             }
@@ -86,12 +105,15 @@ export class TypeGenerator extends Generator {
 
         const typeDefinitions: Record<string, TypeDef> = {};
         _.forOwn(decoratedResponseTypes, (model, name) => {
-            const generatedResponseTypes: TypeDef[] = getTypesFromSchema(name, model);
+            const generatedResponseTypes: TypeDef[] = getTypesFromSchema(
+                name,
+                model,
+            );
 
             _.map(generatedResponseTypes, (type: TypeDef): void => {
                 typeDefinitions[type.name] = type;
-            })
-        })
+            });
+        });
 
         return {
             operations,
@@ -101,28 +123,28 @@ export class TypeGenerator extends Generator {
             decoratedResponseTypes,
             typeDefinitions,
         } satisfies ProcessorContext;
-    }
+    };
 
     generate = () => {
-        const { typeDefinitions } = this.getContext()
+        const { typeDefinitions } = this.getContext();
 
         let generated = `
-        ${writeFileHeader('types.ts', 'Types and Enums are generated into this file for usage in both the front and backend of your typescript application, representing data coming from and going to the api.')}
+        ${writeFileHeader("types.ts", "Types and Enums are generated into this file for usage in both the front and backend of your typescript application, representing data coming from and going to the api.")}
 
         ${getStaticTypes()}
         
         `;
 
-        _.map(typeDefinitions, t => {
-            if (t.type == 'enum') {
-                return generated += `
+        _.map(typeDefinitions, (t) => {
+            if (t.type == "enum") {
+                return (generated += `
                     /**
                      * Enum: ${t.name}
                      */
                     export enum ${t.name} {
-                        ${_.map(getEnumValues(t.enum), value => `${_.capitalize(_.camelCase(value))} = "${value}"`)}
+                        ${_.map(getEnumValues(t.enum), (value) => `${_.capitalize(_.camelCase(value))} = "${value}"`)}
                     }
-                `;
+                `);
             }
 
             generated += `
@@ -130,11 +152,11 @@ export class TypeGenerator extends Generator {
                  * Type: ${t.name}
                  */
                 export interface ${t.name} {
-                    ${_.map(_.keys(t.definition), property => `${generatePropertyDefinition(t, property)}`).join(';\n')}
+                    ${_.map(_.keys(t.definition), (property) => `${generatePropertyDefinition(t, property)}`).join(";\n")}
                 }
             `;
         });
 
         return generated;
-    }
+    };
 }

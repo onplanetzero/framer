@@ -1,10 +1,15 @@
-import { type IGenerator, type Document, type ProcessorContext, GeneratorTarget } from '../core/types'
+import {
+    type IGenerator,
+    type Document,
+    type ProcessorContext,
+    GeneratorTarget,
+} from "../core/types";
 
 export class Generator implements IGenerator {
-    name: string = 'generator';
+    name: string = "generator";
     target: GeneratorTarget = GeneratorTarget.SingleFile;
-    targetLocation: string = process.cwd() + '/generated';
-    targetName: string = 'generated.ts';
+    targetLocation: string = process.cwd() + "/generated";
+    targetName: string = "generated.ts";
 
     _schema: Document;
     _context: ProcessorContext;
@@ -26,11 +31,11 @@ export class Generator implements IGenerator {
 
     setContext = (context: ProcessorContext): void => {
         this._context = context;
-    }
+    };
 
     getContext = (): ProcessorContext => this._context;
 
-    addContext = (): ProcessorContext => ({})
+    addContext = (): ProcessorContext => ({});
 
     generateTargetName = (schemaName: string): string => {
         if (this.target === GeneratorTarget.SingleFile) {
@@ -42,6 +47,6 @@ export class Generator implements IGenerator {
     };
 
     generate = (): Record<string, string> | string => {
-        throw new Error('implement your generator');
-    }
+        throw new Error("implement your generator");
+    };
 }

@@ -1,21 +1,24 @@
-import { Generator } from './generator';
-import path from 'path';
-import _ from 'lodash';
-import { writeFileHeader } from '../util/file';
-import { generatePropertyDefinition, generateAccessMethods } from '../util/types';
-import { GeneratorTarget } from '../core/types';
+import { Generator } from "./generator";
+import path from "path";
+import _ from "lodash";
+import { writeFileHeader } from "../util/file";
+import {
+    generatePropertyDefinition,
+    generateAccessMethods,
+} from "../util/types";
+import { GeneratorTarget } from "../core/types";
 
 export class DTOGenerator extends Generator {
-    name = 'dto';
+    name = "dto";
     target = GeneratorTarget.SingleFile;
-    targetLocation = path.resolve(process.cwd(), './generated');
-    targetName = 'dto.ts';
+    targetLocation = path.resolve(process.cwd(), "./generated");
+    targetName = "dto.ts";
 
     generate = () => {
-        const { typeDefinitions } = this.getContext()
+        const { typeDefinitions } = this.getContext();
 
         let generated = `
-        ${writeFileHeader('dto.ts', 'Objects generated in this file represent data transfer objects used for organizing, formatting and/or cleaning objects being sent to the application or being returned from the application.')}
+        ${writeFileHeader("dto.ts", "Objects generated in this file represent data transfer objects used for organizing, formatting and/or cleaning objects being sent to the application or being returned from the application.")}
 
         import * as generatedTypes from './types'
 
@@ -29,7 +32,7 @@ export class DTOGenerator extends Generator {
 
         `;
 
-        _.map(typeDefinitions, type => {
+        _.map(typeDefinitions, (type) => {
             const properties = _.keys(type.definition);
             if (!properties.length) {
                 return; // enums are also generated in the type definition and they can't be made classes
@@ -47,7 +50,7 @@ export class DTOGenerator extends Generator {
 
             export class ${type.name}Dto {
                 // properties
-                ${_.map(properties, property => `${generatePropertyDefinition(type, property, 'generatedTypes.')}`).join(';\n')}
+                ${_.map(properties, (property) => `${generatePropertyDefinition(type, property, "generatedTypes.")}`).join(";\n")}
                 
                 constructor(obj: ${type.name}Like | undefined) {
                     if(typeof undefined !== typeof obj) {
@@ -70,11 +73,11 @@ export class DTOGenerator extends Generator {
                 }
 
                 // accessor methods
-                ${_.map(properties, property => `${generateAccessMethods(type, property, 'generatedTypes.')}`).join('\n')}
+                ${_.map(properties, (property) => `${generateAccessMethods(type, property, "generatedTypes.")}`).join("\n")}
             }
-            `
-        })
+            `;
+        });
 
         return generated;
-    }
+    };
 }

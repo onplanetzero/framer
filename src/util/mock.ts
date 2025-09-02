@@ -4,70 +4,82 @@ import { getTypeFromSchema } from "./types";
 /**
  * convenience method for attempting to generate id like things when mocking instead of annoyingly bad data
  * without adding nonsense x- fields to the yaml
- * 
- * @param {string} property 
+ *
+ * @param {string} property
  * @returns {bool}
  */
 export const maybeIdField = (property: string, schema: Schema): boolean => {
     // this should be pretty much the case
-    if (['integer', 'string'].indexOf(String(schema.type)) === -1) {
+    if (["integer", "string"].indexOf(String(schema.type)) === -1) {
         return false;
     }
 
     // id
-    if (['id', 'uuid', 'guid'].indexOf(property) > -1) {
+    if (["id", "uuid", "guid"].indexOf(property) > -1) {
         return true;
     }
 
     // id_user user_id
-    if (property.startsWith('id_') || property.endsWith('_id')) {
+    if (property.startsWith("id_") || property.endsWith("_id")) {
         return true;
     }
 
     // idUser
-    if (property.startsWith('id') && (property.length > 2 && property.charAt(2) === property.charAt(2).toUpperCase())) {
+    if (
+        property.startsWith("id") &&
+        property.length > 2 &&
+        property.charAt(2) === property.charAt(2).toUpperCase()
+    ) {
         return true;
     }
 
     return false;
-}
+};
 
-export const getPropertyMock = (property: string, type: TypeDef, schema: Schema) => {
+export const getPropertyMock = (
+    property: string,
+    type: TypeDef,
+    schema: Schema,
+) => {
     return `${property}: ${getPropertyMockValue(property, type, schema)}`;
-}
+};
 
 export const mockObjectValue = (type: TypeDef) => `create${type.name}Factory()`;
 
-export const mockArrayValues = (property: string, type: TypeDef, schema: ArraySchema): string => {
+export const mockArrayValues = (
+    property: string,
+    type: TypeDef,
+    schema: ArraySchema,
+): string => {
     const required = type.required ?? [],
         isRequired = required.indexOf(property) > -1,
         itemType = getTypeFromSchema(`${property}Items`, schema.items);
-    return `Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, () => ${getPropertyMockValue(`${property}.items`, type, schema.items)})${isRequired ? ` as NonEmptyArray<${itemType}>` : ''}`;
-}
+    return `Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, () => ${getPropertyMockValue(`${property}.items`, type, schema.items)})${isRequired ? ` as NonEmptyArray<${itemType}>` : ""}`;
+};
 
 export const mockStringValue = (schema: Schema) => {
     switch (schema.format) {
-        case 'email':
-            return 'faker.internet.email()';
-        case 'uuid':
-            return 'faker.string.uuid()';
-        case 'uri':
-        case 'hostname':
-            return 'faker.internet.url()';
-        case 'ip':
-        case 'ipv4':
-            return 'faker.internet.ipv4()';
-        case 'ipv6':
-            return 'faker.internet.ipv6()';
-        case 'token':
-            return 'faker.internet.jwt()';
-        case 'date':
-        case 'date-time':
-            return 'faker.date.anytime()';
+        case "email":
+            return "faker.internet.email()";
+        case "uuid":
+            return "faker.string.uuid()";
+        case "uri":
+        case "hostname":
+            return "faker.internet.url()";
+        case "ip":
+        case "ipv4":
+            return "faker.internet.ipv4()";
+        case "ipv6":
+            return "faker.internet.ipv6()";
+        case "token":
+            return "faker.internet.jwt()";
+        case "date":
+        case "date-time":
+            return "faker.date.anytime()";
         default:
-            return 'faker.lorem.words({ min: 1, max: 3 })';
+            return "faker.lorem.words({ min: 1, max: 3 })";
     }
-}
+};
 
 export const mockNumberValue = (schema: Schema): string => {
     const min = schema.minimum ?? 1,
@@ -75,17 +87,27 @@ export const mockNumberValue = (schema: Schema): string => {
         exclusiveMinimum = schema.exclusiveMinimum ?? false,
         exclusiveMaximum = schema.exclusiveMaximum ?? false,
         multipleOf = schema.multipleOf ?? undefined,
-        type = schema.type === 'integer' ? 'int' : 'float';
+        type = schema.type === "integer" ? "int" : "float";
 
     const finalMinimum = exclusiveMinimum ? min + 1 : min,
         finalMaximum = max ? (exclusiveMaximum ? max - 1 : max) : undefined,
-        maximumString = typeof undefined === typeof finalMaximum ? '' : `max: ${finalMaximum},`,
-        multipleOfString = typeof undefined === typeof multipleOf ? '' : `multipleOf: ${multipleOf}`;
+        maximumString =
+            typeof undefined === typeof finalMaximum
+                ? ""
+                : `max: ${finalMaximum},`,
+        multipleOfString =
+            typeof undefined === typeof multipleOf
+                ? ""
+                : `multipleOf: ${multipleOf}`;
 
-    return `faker.number.${type}({ min: ${finalMinimum}, ${maximumString}${multipleOfString} })`
-}
+    return `faker.number.${type}({ min: ${finalMinimum}, ${maximumString}${multipleOfString} })`;
+};
 
-export const getPropertyMockValue = (property: string, type: TypeDef, schema: Schema): string => {
+export const getPropertyMockValue = (
+    property: string,
+    type: TypeDef,
+    schema: Schema,
+): string => {
     if (schema.properties) {
         return mockObjectValue(type);
     }
@@ -96,26 +118,27 @@ export const getPropertyMockValue = (property: string, type: TypeDef, schema: Sc
     }
 
     const isIdField = maybeIdField(property, schema);
-    if (isIdField) { // this is currently just int/string
-        return `faker.${schema.type === 'string' ? 'string' : 'number'}.${schema.type === 'string' ? 'uuid()' : 'int({ min: 100, max: 999 })'}`;
+    if (isIdField) {
+        // this is currently just int/string
+        return `faker.${schema.type === "string" ? "string" : "number"}.${schema.type === "string" ? "uuid()" : "int({ min: 100, max: 999 })"}`;
     }
 
     // allow customizing if you really want to from yaml
-    if (schema['x-faker'] !== undefined) {
-        const fakerImpl = schema['x-faker'];
-        return `faker.${fakerImpl}`
+    if (schema["x-faker"] !== undefined) {
+        const fakerImpl = schema["x-faker"];
+        return `faker.${fakerImpl}`;
     }
 
     switch (schema.type) {
-        case 'array':
+        case "array":
             return mockArrayValues(property, type, schema);
-        case 'boolean':
-            return 'faker.datatype.boolean()';
-        case 'integer':
-        case 'number':
+        case "boolean":
+            return "faker.datatype.boolean()";
+        case "integer":
+        case "number":
             return mockNumberValue(schema);
-        case 'string':
+        case "string":
         default:
             return mockStringValue(schema);
     }
-}
+};
