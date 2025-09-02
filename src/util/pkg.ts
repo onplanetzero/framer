@@ -20,8 +20,8 @@ export const isFakerInstalled = (): boolean => {
         }
 
         return false;
-    } catch (e) {
-        // eslint-disable-line @typescript-eslint/no-unused-vars
+    } catch (e) { // eslint-disable-line @typescript-eslint/no-unused-vars
+
         console.warn(
             "Faker is recommended for usage with this library, if you wish to use the mocks, install @faker-js/faker",
         );

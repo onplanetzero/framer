@@ -11,8 +11,9 @@
     "test": "jest",
     "types": "tsc --noEmit",
     "lint": "eslint --fix",
+    "lint:ci": "eslint",
     "format": "prettier --write src/",
-    "format:check": "prettier --check src/"
+    "format:ci": "prettier --check src/"
   },
   "keywords": [],
   "author": "",
