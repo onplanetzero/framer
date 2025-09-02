@@ -4,7 +4,6 @@ import _ from 'lodash';
 import { writeFileHeader } from '../util/file';
 import { getPropertyMock } from '../util/mock';
 import { GeneratorTarget, type Schema } from '../core/types';
-import { OpenAPIV3 } from 'openapi-types';
 
 export class DTOMockerGenerator extends Generator {
     name = 'dto-mocker';
@@ -44,7 +43,7 @@ export class DTOMockerGenerator extends Generator {
                 return; // enums are also generated in the type definition and they can't be made classes
             }
 
-            const schemaProperties: OpenAPIV3.SchemaObject = schema.properties;
+            const schemaProperties: Schema = schema.properties;
             generated += `
                 export const create${type.name}Factory = (overrides: Partial<${type.name}> = {}): ${type.name}Dto => new ${type.name}Dto({
                     ${_.map(properties, property => getPropertyMock(property, type, schemaProperties[property])).join(',')},

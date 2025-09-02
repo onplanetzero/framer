@@ -18,7 +18,6 @@ import {
     type TypeDef,
     SupportedDataFormat
 } from '../core/types'
-import { OpenAPIV3_1, OpenAPIV3 } from 'openapi-types';
 
 export class TypeGenerator extends Generator {
     name = 'types';

@@ -1,4 +1,3 @@
-import { OpenAPIV3_1 } from 'openapi-types';
 import { type IGenerator, type Document, type ProcessorContext, GeneratorTarget } from '../core/types'
 
 export class Generator implements IGenerator {

@@ -50,7 +50,7 @@ export const decorateWithLookupTypes = (schema: Schema, lookupTypes: LookupTypes
         const arrayItemSchema = getArrayItemsSchema(<ArraySchema>schema),
             index = _.findIndex(lookupTypeValues, json => json == JSON.stringify(arrayItemSchema));
 
-        let collectionSchema = <ArraySchema>schema;
+        let collectionSchema = <ArraySchema>schema; // eslint-disable-line prefer-const
         if (index > -1) {
             collectionSchema.items = decorateWithType(lookupTypeKeys[index], arrayItemSchema);
         }
