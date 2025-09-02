@@ -1,8 +1,10 @@
-import { GeneratorTarget, Generator } from './generator';
+import { Generator } from './generator';
 import path from 'path';
 import _ from 'lodash';
 import { writeFileHeader } from '../util/file';
 import { getPropertyMock } from '../util/mock';
+import { GeneratorTarget, type Schema } from '../core/types';
+import { OpenAPIV3 } from 'openapi-types';
 
 export class DTOMockerGenerator extends Generator {
     name = 'dto-mocker';
@@ -10,10 +12,11 @@ export class DTOMockerGenerator extends Generator {
     targetLocation = path.resolve(process.cwd(), './generated');
     targetName = 'dto-mocker.ts';
 
-    addContext = () => { }
-
     generate = () => {
         const { typeDefinitions, types } = this.getContext()
+        if (types === undefined || typeDefinitions === undefined) {
+            throw 'Invalid run order, DTOMockGenerator must run after type generator';
+        }
 
         const imports = _.map(
             typeDefinitions,
@@ -37,13 +40,14 @@ export class DTOMockerGenerator extends Generator {
         _.map(typeDefinitions, type => {
             const properties = _.keys(type.definition),
                 schema = types[type.name];
-            if (!properties.length) {
+            if (!properties.length || schema.properties === undefined) {
                 return; // enums are also generated in the type definition and they can't be made classes
             }
 
+            const schemaProperties: OpenAPIV3.SchemaObject = schema.properties;
             generated += `
                 export const create${type.name}Factory = (overrides: Partial<${type.name}> = {}): ${type.name}Dto => new ${type.name}Dto({
-                    ${_.map(properties, property => getPropertyMock(property, type, schema.properties[property])).join(',')},
+                    ${_.map(properties, property => getPropertyMock(property, type, schemaProperties[property])).join(',')},
                     ...overrides
                 });
             `;

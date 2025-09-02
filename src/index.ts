@@ -4,15 +4,15 @@ import figlet from 'figlet';
 import { parse } from './util/parser';
 import { combine } from './util/combiner';
 import { Processor } from './core/processor';
-import fs from 'fs';
-import { exec } from 'child_process';
+import fs from 'node:fs';
+import { type Document } from './core/types';
 
 console.log(figlet.textSync('Framer'));
 
 program.version('0.0.1')
     .description('A javascript code generator following openapi spec 3.x that generates schemas to enforce a contract between client and api');
 
-const generate = program
+program
     .command('generate')
     .version("0.0.1")
     .option("-a, --api <file>", "The yaml file(s) being used for generation")
@@ -36,13 +36,10 @@ const generate = program
             throw new Error('Either a schema file or a directory must be provided for generation');
         }
 
-        const schema = await parse(apiFile),
+        const schema: Document = await parse(apiFile),
             processor = new Processor();
 
         processor.run(schema);
-
-        const dir = process.cwd() + '/generated';
-        exec('npx prettier --write ' + dir)
     });
 
 program.parse(process.argv);

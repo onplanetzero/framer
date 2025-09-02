@@ -1,3 +1,4 @@
+import { type TypeDef, type Schema, type ArraySchema } from "../core/types";
 import { getTypeFromSchema } from "./types";
 
 /**
@@ -7,9 +8,9 @@ import { getTypeFromSchema } from "./types";
  * @param {string} property 
  * @returns {bool}
  */
-export const maybeIdField = (property, schema) => {
+export const maybeIdField = (property: string, schema: Schema): boolean => {
     // this should be pretty much the case
-    if (['integer', 'string'].indexOf(schema.type) === -1) {
+    if (['integer', 'string'].indexOf(String(schema.type)) === -1) {
         return false;
     }
 
@@ -31,19 +32,20 @@ export const maybeIdField = (property, schema) => {
     return false;
 }
 
-export const getPropertyMock = (property, type, schema) => {
+export const getPropertyMock = (property: string, type: TypeDef, schema: Schema) => {
     return `${property}: ${getPropertyMockValue(property, type, schema)}`;
 }
 
-export const mockObjectValue = (type) => `create${type.name}Factory()`;
+export const mockObjectValue = (type: TypeDef) => `create${type.name}Factory()`;
 
-export const mockArrayValues = (property, type, schema) => {
-    const isRequired = type.required.indexOf(property) > -1,
+export const mockArrayValues = (property: string, type: TypeDef, schema: ArraySchema): string => {
+    const required = type.required ?? [],
+        isRequired = required.indexOf(property) > -1,
         itemType = getTypeFromSchema(`${property}Items`, schema.items);
     return `Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, () => ${getPropertyMockValue(`${property}.items`, type, schema.items)})${isRequired ? ` as NonEmptyArray<${itemType}>` : ''}`;
 }
 
-export const mockStringValue = (schema) => {
+export const mockStringValue = (schema: Schema) => {
     switch (schema.format) {
         case 'email':
             return 'faker.internet.email()';
@@ -59,14 +61,17 @@ export const mockStringValue = (schema) => {
             return 'faker.internet.ipv6()';
         case 'token':
             return 'faker.internet.jwt()';
+        case 'date':
+        case 'date-time':
+            return 'faker.date.anytime()';
         default:
             return 'faker.lorem.words({ min: 1, max: 3 })';
     }
 }
 
-export const mockNumberValue = schema => {
+export const mockNumberValue = (schema: Schema): string => {
     const min = schema.minimum ?? 1,
-        max = schema.maximium ?? undefined,
+        max = schema.maximum ?? undefined,
         exclusiveMinimum = schema.exclusiveMinimum ?? false,
         exclusiveMaximum = schema.exclusiveMaximum ?? false,
         multipleOf = schema.multipleOf ?? undefined,
@@ -80,7 +85,7 @@ export const mockNumberValue = schema => {
     return `faker.number.${type}({ min: ${finalMinimum}, ${maximumString}${multipleOfString} })`
 }
 
-export const getPropertyMockValue = (property, type, schema) => {
+export const getPropertyMockValue = (property: string, type: TypeDef, schema: Schema): string => {
     if (schema.properties) {
         return mockObjectValue(type);
     }
@@ -96,7 +101,7 @@ export const getPropertyMockValue = (property, type, schema) => {
     }
 
     // allow customizing if you really want to from yaml
-    if (typeof undefined !== typeof schema['x-faker']) {
+    if (schema['x-faker'] !== undefined) {
         const fakerImpl = schema['x-faker'];
         return `faker.${fakerImpl}`
     }
@@ -109,9 +114,6 @@ export const getPropertyMockValue = (property, type, schema) => {
         case 'integer':
         case 'number':
             return mockNumberValue(schema);
-        case 'date':
-        case 'date-time':
-            return 'faker.date.anytime()';
         case 'string':
         default:
             return mockStringValue(schema);

@@ -1,16 +1,19 @@
 import _ from 'lodash';
+import {
+    type Schema,
+    type ArraySchema,
+    type TypeDef,
+    type LookupTypes,
+    type SchemaMap
+} from '../core/types'
 
 /**
  * decorateWithType
  * 
  * Decorates an object with __ref pointing to its originating schema name if possible
- * 
- * @param {string} schemaName 
- * @param {object} schema 
- * @returns {object}
  */
-export const decorateWithType = (schemaName, schema) => {
-    let type = {
+export const decorateWithType = (schemaName: string, schema: Schema): Schema => {
+    const type = {
         ...schema
     }
 
@@ -32,40 +35,45 @@ export const decorateWithType = (schemaName, schema) => {
  * if we've already created a type for a model used in a collection, we don't want to duplicate 
  * that type so we decorate it with a __ref.  To compare nested object definitions, we keep a
  * JSON stringified dictionary to look them up from, which is passed as lookupTypes
- * 
- * @param {object} schema schema being decorated with nested refs if needed
- * @param {object} lookupTypes dictionary of stringified api types already created for lookups
- * @returns {object}
  */
-export const decorateWithLookupTypes = (schema, lookupTypes) => {
+export const decorateWithLookupTypes = (schema: Schema, lookupTypes: LookupTypes): Schema => {
     if (isPrimitive(schema)) {
         return schema;
     }
 
-    const lookupTypeValues = _.values(lookupTypes),
-        lookupTypeKeys = _.keys(lookupTypes);
+    const lookupTypeValues: string[] = _.values(lookupTypes),
+        lookupTypeKeys: string[] = _.keys(lookupTypes);
 
     // Collection
     // schema.items found in list of already created schemas, we'll decorate it with a type def
     if (isCollection(schema)) {
-        const index = _.findIndex(lookupTypeValues, json => json == JSON.stringify(schema.items));
+        const arrayItemSchema = getArrayItemsSchema(<ArraySchema>schema),
+            index = _.findIndex(lookupTypeValues, json => json == JSON.stringify(arrayItemSchema));
+
+        let collectionSchema = <ArraySchema>schema;
         if (index > -1) {
-            schema.items = decorateWithType(lookupTypeKeys[index], schema.items);
+            collectionSchema.items = decorateWithType(lookupTypeKeys[index], arrayItemSchema);
         }
-        return schema;
+        return collectionSchema;
     }
 
     // Object properties
     //  object has a property that matches a type definition so we'll decorate it
-    if (schema.properties) { // is object
-        const properties = _.keys(schema.properties);
-        _.map(properties, property => {
-            const propertySchema = schema.properties[property];
-            schema.properties[property] = decorateWithLookupTypes(propertySchema, lookupTypes);
+    if (schema.properties !== undefined) { // is object
+        const properties: SchemaMap = schema.properties;
+        const propertyKeys: string[] = Object.keys(schema.properties);
+        _.map(propertyKeys, (property: string): void => {
+            if (undefined === properties[property]) {
+                return;
+            }
+            const propertySchema: Schema = properties[property];
+            properties[property] = decorateWithLookupTypes(propertySchema, lookupTypes);
         });
+
+        schema.properties = properties;
     }
 
-    const index = _.findIndex(lookupTypeValues, json => json == JSON.stringify(schema))
+    const index: number = _.findIndex(lookupTypeValues, json => json == JSON.stringify(schema))
     if (index > -1) {
         return decorateWithType(lookupTypeKeys[index], schema);
     }
@@ -77,11 +85,8 @@ export const decorateWithLookupTypes = (schema, lookupTypes) => {
  * getTypeFromPrimitive
  * 
  * Gets the primitive type used for typescript for a given schema
- * 
- * @param {object} schema 
- * @returns {string}
  */
-export const getTypeFromPrimitive = (schema) => {
+export const getTypeFromPrimitive = (schema: Schema): string => {
     switch (schema.type) {
         case 'integer':
         case 'number':
@@ -97,18 +102,11 @@ export const getTypeFromPrimitive = (schema) => {
  * getTypeFromArraySchema
  * 
  * Gets the type field for an array schema with complex or primitive items
- * 
- * @param {string} schemaName 
- * @param {object} schema 
- * @returns {string}
  */
-export const getTypeFromArraySchema = (schemaName, schema) => {
-    if (!schema.items) {
-        throw new Error('Item is not an array');
-    }
-    const itemsSchema = schema.items;
+export const getTypeFromArraySchema = (schemaName: string, schema: ArraySchema): string => {
+    const itemsSchema: Schema = schema.items;
 
-    let itemSchemaType = '';
+    let itemSchemaType: string = '';
     switch (itemsSchema.type) {
         case 'object':
             itemSchemaType = itemsSchema.__ref ? itemsSchema.__ref + '[]' : 'object[]';
@@ -125,15 +123,12 @@ export const getTypeFromArraySchema = (schemaName, schema) => {
  * getTypeFromSchema
  * 
  * Gets the string type used for a field from an open api field schema
- * 
- * @param {string} schemaName 
- * @param {object} schema 
- * @returns {string}
  */
-export const getTypeFromSchema = (schemaName, schema) => {
-    if (schema.enum) {
+export const getTypeFromSchema = (schemaName: string, schema: Schema): string => {
+    if (schema.enum !== undefined) {
         return _.capitalize(schemaName) + 'Enum';
     }
+
     switch (schema.type) {
         case 'object':
             return schema.__ref ?? 'object';
@@ -147,18 +142,16 @@ export const getTypeFromSchema = (schemaName, schema) => {
 /**
  * isPrimitive
  * 
- * @param {object} schema 
- * @returns {boolean}
+ * Checks if a schema is representative of a primitive type, and not an object or array
  */
-export const isPrimitive = (schema) => schema.type !== 'object' && schema.type !== 'array';
+export const isPrimitive = (schema: Schema): boolean => schema.type !== 'object' && schema.type !== 'array';
 
 /**
  * isTypePrimitive
  * 
- * @param {string} string 
- * @returns {boolean}
+ * Checks if a type string is representative of a primitive value in typescript
  */
-export const isTypePrimitive = (string) => ~_.findIndex([
+export const isTypePrimitive = (string: string): boolean => _.findIndex([
     'string',
     'number',
     'bigint',
@@ -166,21 +159,27 @@ export const isTypePrimitive = (string) => ~_.findIndex([
     'undefined',
     'symbol',
     'null',
-], str => str === string);
+], str => str === string) > -1;
 
 /**
  * isCollection
  * 
  * Determines if an array schema is a collection
- * 
- * @param {object} schema 
- * @returns {boolean}
  */
-export const isCollection = (schema) => {
-    if (schema.type === 'array' && schema.items && !isPrimitive(schema.items)) {
+export const isCollection = (schema: Schema): boolean => {
+    if (schema.type === 'array' && schema.items !== undefined && !isPrimitive(schema.items)) {
         return true;
     }
     return false;
+}
+
+/**
+ * getItemsSchema
+ * 
+ * 
+ */
+export const getArrayItemsSchema = (schema: ArraySchema): Schema => {
+    return schema.items
 }
 
 /**
@@ -188,33 +187,26 @@ export const isCollection = (schema) => {
  * 
  * Determines if a schema contains nested non-primitive schemas in either array items or
  * object properties
- * 
- * @param {object} schema 
- * @returns {boolean}
  */
-export const containsChildSchemas = (schema) => {
+export const containsChildSchemas = (schema: Schema): boolean => {
     if (isPrimitive(schema)) {
         return false;
     }
 
-    if ('array' === schema.type && schema.items && !isPrimitive(schema.items)) {
+    if ('array' === schema.type && schema.items !== undefined && !isPrimitive(schema.items)) {
         return true;
     } else if ('array' === schema.type) {
         return false;
     }
-
-    // its an object
     return true;
 }
 
 /**
  * getTypesFromSchema
  * 
- * @param {*} schemaName 
- * @param {*} schema 
- * @returns 
+ * Gets type definitions from a schema, checking the parent and the nested child schemas
  */
-export const getTypesFromSchema = (schemaName, schema) => {
+export const getTypesFromSchema = (schemaName: string, schema: Schema): TypeDef[] => {
     // flat objects 
     if (!containsChildSchemas(schema)) {
         return [{
@@ -225,22 +217,24 @@ export const getTypesFromSchema = (schemaName, schema) => {
 
     // collections
     if (isCollection(schema)) {
+        const arraySchema = <ArraySchema>schema;
         return [
             // any schemas generated from collection items
-            ...getTypesFromSchema(schema.items.__ref ?? 'object', schema.items) // in this case we don't need the originating shema because we've already added it
+            ...getTypesFromSchema(arraySchema.items.__ref ?? 'object', arraySchema.items) // in this case we don't need the originating shema because we've already added it
         ];
     }
 
     // objects
     // this could be a nested object so we recursively search it and merge
-    if (schema.properties) {
-        const keys = _.keys(schema.properties),
-            required = schema.required ?? [];
+    if (schema.properties !== undefined) {
+        const properties: SchemaMap = schema.properties,
+            propertyKeys: string[] = _.keys(schema.properties),
+            required: string[] = schema.required ?? [];
 
-        let definitions = [],
-            definition = {}
-        _.map(keys, property => {
-            let propertySchema = schema.properties[property];
+        let definitions: TypeDef[] = [],
+            definition: Record<string, string> = {};
+        _.map(propertyKeys, property => {
+            const propertySchema: Schema = properties[property];
             definition = {
                 ...definition,
                 [property]: getTypeFromSchema(property, propertySchema),
@@ -250,13 +244,17 @@ export const getTypesFromSchema = (schemaName, schema) => {
                 Array.prototype.push.apply(definitions, getTypesFromSchema(property, propertySchema));
             }
 
-            if (propertySchema.enum && propertySchema.type == 'string') {
-                definitions.push({
-                    name: _.capitalize(property) + 'Enum',
-                    type: 'enum',
-                    enumType: propertySchema.type,
-                    enum: propertySchema.enum
-                })
+            if (propertySchema.enum !== undefined && propertySchema.type == 'string') {
+                definitions = [
+                    ...definitions,
+                    {
+                        name: _.capitalize(property) + 'Enum',
+                        type: 'enum',
+                        definition: {},
+                        enumType: propertySchema.type,
+                        enum: propertySchema.enum
+                    }
+                ]
             }
         });
 
@@ -270,20 +268,25 @@ export const getTypesFromSchema = (schemaName, schema) => {
     return [];
 }
 
-export const getStaticTypes = () => 'export type NonEmptyArray<T> = [T, ...T[]];';
+export const getStaticTypes = (): string => 'export type NonEmptyArray<T> = [T, ...T[]];';
 
-export const getPrefixedType = (type, prefix = '') => {
+export const getPrefixedType = (type: string, prefix: string = ''): string => {
     if (isTypePrimitive(type)) {
         return type;
     }
     return prefix + type;
 }
 
-export const generatePropertyDefinition = (type, property, typePrefix = '') => {
-    let propertyDefinition = type.definition[property],
-        isRequired = _.findIndex(type.required, str => str === property) > -1,
-        propertyName = property
+export const generatePropertyDefinition = (type: TypeDef, property: string, typePrefix: string = ''): string => {
+    if (typeof type.definition !== 'object') {
+        throw `Tried to generate a property definition for a non-object parent ${JSON.stringify(type)}`
+    }
 
+    const definition: Record<string, string> = type.definition,
+        isRequired = _.findIndex(type.required, str => str === property) > -1;
+
+    let propertyDefinition = definition[property],
+        propertyName = property;
     if (propertyDefinition.includes('[]')) {
         propertyDefinition = propertyDefinition.replace('[]', '');
         if (!isTypePrimitive(propertyDefinition)) {
@@ -303,15 +306,19 @@ export const generatePropertyDefinition = (type, property, typePrefix = '') => {
     return `${propertyName}: ${getPrefixedType(propertyDefinition, typePrefix)}`;
 }
 
-export const generateAccessMethods = (type, property, typePrefix = '') => {
-    const accessorTypeName = _.startCase(property).replace(/\s/g, ''),
-        isRequired = _.findIndex(type.required, str => str === property) > -1,
-        getterName = `get${accessorTypeName}`,
-        setterName = `set${accessorTypeName}`,
-        typeDef = type.definition[property];
+export const generateAccessMethods = (type: TypeDef, property: string, typePrefix: string = '') => {
+    if (typeof type.definition !== 'object' || type.definition === undefined) {
+        throw 'Tried to generate access methods for an invalid definition ' + JSON.stringify(type);
+    }
 
-    let outType = typeDef,
-        isArray = false;
+    const accessorTypeName: string = _.startCase(property).replace(/\s/g, ''),
+        isRequired: boolean = _.findIndex(type.required, str => str === property) > -1,
+        getterName: string = `get${accessorTypeName}`,
+        setterName: string = `set${accessorTypeName}`,
+        typeString: string = type.definition[property];
+
+    let outType: string = typeString,
+        isArray: boolean = false;
     if (outType.includes('[]')) {
         isArray = true;
         outType = outType.replace('[]', '');
@@ -334,5 +341,7 @@ export const generateAccessMethods = (type, property, typePrefix = '') => {
         ${getterName} = (formatted: boolean = false): ${outType} => {
             return this.${property};
         }
-    `
+    `;
 }
+
+export const getEnumValues = (enumArray: string[] | undefined = []): string[] => enumArray;

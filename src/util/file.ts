@@ -1,6 +1,6 @@
 import { getVersion, getToolName } from './pkg';
 
-export const writeFileHeader = (name, description) => {
+export const writeFileHeader = (name: string, description: string): string => {
     return `
     /**
      * -----------------------------------

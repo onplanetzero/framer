@@ -1,16 +1,15 @@
-import { GeneratorTarget, Generator } from './generator';
+import { Generator } from './generator';
 import path from 'path';
 import _ from 'lodash';
 import { writeFileHeader } from '../util/file';
 import { generatePropertyDefinition, generateAccessMethods } from '../util/types';
+import { GeneratorTarget } from '../core/types';
 
 export class DTOGenerator extends Generator {
     name = 'dto';
     target = GeneratorTarget.SingleFile;
     targetLocation = path.resolve(process.cwd(), './generated');
     targetName = 'dto.ts';
-
-    addContext = () => { }
 
     generate = () => {
         const { typeDefinitions } = this.getContext()
