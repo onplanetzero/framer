@@ -20,9 +20,8 @@ export const isFakerInstalled = (): boolean => {
         }
 
         return false;
+        // eslint-disable-next-line
     } catch (e) {
-         
-
         console.warn(
             "Faker is recommended for usage with this library, if you wish to use the mocks, install @faker-js/faker",
         );
