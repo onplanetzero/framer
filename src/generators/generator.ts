@@ -1,11 +1,11 @@
 import {
-    type IGenerator,
+    type GeneratorInterface,
     type Document,
     type ProcessorContext,
     GeneratorTarget,
 } from "../core/types";
 
-export class Generator implements IGenerator {
+export class Generator implements GeneratorInterface {
     name: string = "generator";
     target: GeneratorTarget = GeneratorTarget.SingleFile;
     targetLocation: string = process.cwd() + "/generated";

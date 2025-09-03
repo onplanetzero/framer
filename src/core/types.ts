@@ -9,10 +9,10 @@ export type ResponsesObject = OpenAPIV3_1.ResponsesObject;
 export type ResponseObject =
     | OpenAPIV3_1.ResponseObject
     | (OpenAPIV3_1.ReferenceObject & {
-          content?: OpenAPIV3_1.MediaTypeObject; // bugfix for content doesn't exist on ResponseObject bug
-      });
+        content?: OpenAPIV3_1.MediaTypeObject; // bugfix for content doesn't exist on ResponseObject bug
+    });
 export type GeneratedContent = Record<string, string | Record<string, string>>;
-export interface IGenerator {
+export interface GeneratorInterface {
     name: string;
     target: GeneratorTarget;
     targetLocation: string;

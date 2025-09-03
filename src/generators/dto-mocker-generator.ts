@@ -3,9 +3,9 @@ import path from "path";
 import _ from "lodash";
 import { writeFileHeader } from "../util/file";
 import { getPropertyMock } from "../util/mock";
-import { GeneratorTarget, type IGenerator, type Schema } from "../core/types";
+import { GeneratorTarget, type GeneratorInterface, type Schema } from "../core/types";
 
-export class DTOMockerGenerator extends Generator implements IGenerator {
+export class DTOMockerGenerator extends Generator implements GeneratorInterface {
     name = "dto-mocker";
     target = GeneratorTarget.SingleFile;
     targetLocation = path.resolve(process.cwd(), "./generated");
@@ -25,9 +25,9 @@ export class DTOMockerGenerator extends Generator implements IGenerator {
         import { faker } from '@faker-js/faker';
         import {
             ${_.map(
-                _.filter(imports, (name) => !name.includes("Enum")),
-                (name) => `${name}Dto`,
-            ).join(", ")}
+            _.filter(imports, (name) => !name.includes("Enum")),
+            (name) => `${name}Dto`,
+        ).join(", ")}
         } from './dto';
         import {
             NonEmptyArray,

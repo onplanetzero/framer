@@ -23,10 +23,10 @@ import {
     type ResponseObject,
     type TypeDef,
     SupportedDataFormat,
-    type IGenerator,
+    type GeneratorInterface,
 } from "../core/types";
 
-export class TypeGenerator extends Generator implements IGenerator {
+export class TypeGenerator extends Generator implements GeneratorInterface {
     name = "types";
     target = GeneratorTarget.SingleFile;
     targetLocation = path.resolve(process.cwd(), "./generated");
