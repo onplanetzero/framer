@@ -6,9 +6,9 @@ import {
     generatePropertyDefinition,
     generateAccessMethods,
 } from "../util/types";
-import { GeneratorTarget } from "../core/types";
+import { GeneratorTarget, type IGenerator } from "../core/types";
 
-export class DTOGenerator extends Generator {
+export class DTOGenerator extends Generator implements IGenerator {
     name = "dto";
     target = GeneratorTarget.SingleFile;
     targetLocation = path.resolve(process.cwd(), "./generated");

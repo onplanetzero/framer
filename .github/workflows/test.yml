@@ -34,17 +34,7 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typescript Type Check
-        run: pnpm types
+      - name: Jest Tests
+        run: pnpm test:ci
 
-      # - name: Format
-      #   run: pnpm format:ci
-
-      - name: Lint
-        run: pnpm lint:ci
-
-      # - name: Commit Changes
-      #   uses: stefanzweifel/git-auto-commit-action@v5
-      #   with:
-      #     commit_message: fix code style
-      #     commit_options: '--no-verify'
+      

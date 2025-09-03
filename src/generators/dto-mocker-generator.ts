@@ -3,9 +3,9 @@ import path from "path";
 import _ from "lodash";
 import { writeFileHeader } from "../util/file";
 import { getPropertyMock } from "../util/mock";
-import { GeneratorTarget, type Schema } from "../core/types";
+import { GeneratorTarget, type IGenerator, type Schema } from "../core/types";
 
-export class DTOMockerGenerator extends Generator {
+export class DTOMockerGenerator extends Generator implements IGenerator {
     name = "dto-mocker";
     target = GeneratorTarget.SingleFile;
     targetLocation = path.resolve(process.cwd(), "./generated");

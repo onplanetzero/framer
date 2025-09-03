@@ -8,5 +8,3 @@ import { type Document } from "../core/types";
  */
 export const parse = async (api: string): Promise<Document> =>
     <Document>await SwaggerParser.validate(api);
-
-export const keywords: string[] = ["type", "required"];

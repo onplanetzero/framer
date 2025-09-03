@@ -11,23 +11,37 @@ export type ResponseObject =
     | (OpenAPIV3_1.ReferenceObject & {
           content?: OpenAPIV3_1.MediaTypeObject; // bugfix for content doesn't exist on ResponseObject bug
       });
-
+export type GeneratedContent = Record<string, string | Record<string, string>>;
 export interface IGenerator {
     name: string;
     target: GeneratorTarget;
     targetLocation: string;
     targetName: string;
 
-    addContext: () => ProcessorContext;
+    addContext: () => ProcessorContext | null;
     setContext: (context: ProcessorContext) => void;
     getContext: () => ProcessorContext;
     generateTargetName: (schemaName: string) => string;
     generate: () => Record<string, string> | string;
 }
 
-export interface IProcessor {
+export interface ProcessorInterface {
     completed: string[];
     context: ProcessorContext;
+    schema: Document;
+    options: ProcessorOptions;
+    generated: GeneratedContent;
+
+    parse: () => Promise<Document>;
+    generate: (schema: Document) => GeneratedContent;
+    write: (content: GeneratedContent) => void;
+    format: () => void;
+}
+
+export interface ProcessorOptions {
+    output: string;
+    directory?: string;
+    api?: string;
 }
 
 export type Schema = OpenAPIV3_1.SchemaObject & {

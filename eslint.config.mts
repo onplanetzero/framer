@@ -12,6 +12,8 @@ export default defineConfig([
             "dist/**",
             "jest.config.js",
             "examples/**",
+            "generated/**",
+            "tests/generated/**",
         ],
     }
 ]);
