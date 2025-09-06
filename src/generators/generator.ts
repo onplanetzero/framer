@@ -8,7 +8,6 @@ import {
 export class Generator implements GeneratorInterface {
     name: string = "generator";
     target: GeneratorTarget = GeneratorTarget.SingleFile;
-    targetLocation: string = process.cwd() + "/generated";
     targetName: string = "generated.ts";
 
     _schema: Document;
@@ -22,8 +21,6 @@ export class Generator implements GeneratorInterface {
     getName = (): string => this.name;
 
     getTarget = (): GeneratorTarget => this.target;
-
-    getTargetLocation = (): string => this.targetLocation;
 
     getTargetName = (): string => this.targetName;
 

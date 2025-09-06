@@ -11,11 +11,16 @@ export type ResponseObject =
     | (OpenAPIV3_1.ReferenceObject & {
         content?: OpenAPIV3_1.MediaTypeObject; // bugfix for content doesn't exist on ResponseObject bug
     });
+export type RequestBodyObject =
+    | OpenAPIV3_1.RequestBodyObject
+    | (OpenAPIV3_1.RequestBodyObject & {
+        content?: OpenAPIV3_1.MediaTypeObject; // bugfix for content doesn't exist on ResponseObject bug
+    });
+
 export type GeneratedContent = Record<string, string | Record<string, string>>;
 export interface GeneratorInterface {
     name: string;
     target: GeneratorTarget;
-    targetLocation: string;
     targetName: string;
 
     addContext: () => ProcessorContext | null;
@@ -62,6 +67,8 @@ export interface ProcessorContext {
     responses?: SchemaMap;
     decoratedResponseTypes?: SchemaMap;
     typeDefinitions?: Record<string, TypeDef>;
+    requestBodies?: Record<string, Schema>;
+    decoratedRequestBodies?: Record<string, Schema>;
 }
 
 export enum GeneratorTarget {

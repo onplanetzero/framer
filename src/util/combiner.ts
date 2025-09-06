@@ -8,7 +8,7 @@ const concatArrays = (objValue: unknown, srcValue: unknown): unknown => {
     }
 };
 
-export const combine = (directoryPath: string, outputPath: string): void => {
+export const combine = (directoryPath: string): string => {
     const files: unknown[] = []; // load returns unknown but we know its a string?
     fs.readdirSync(directoryPath).forEach((file) => {
         const data: string | unknown = yaml.load(
@@ -16,6 +16,8 @@ export const combine = (directoryPath: string, outputPath: string): void => {
         );
         files.push(data);
     });
-    const merged = _.mergeWith({}, ...files, concatArrays);
-    fs.writeFileSync(outputPath, yaml.dump(merged));
+
+    return yaml.dump(
+        _.mergeWith({}, ...files, concatArrays)
+    );
 };

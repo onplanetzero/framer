@@ -326,9 +326,19 @@ export const getTypesFromSchema = (
     return [];
 };
 
+/**
+ * getStaticTypes
+ * 
+ * writes out some static types needed for generated types
+ */
 export const getStaticTypes = (): string =>
     "export type NonEmptyArray<T> = [T, ...T[]];";
 
+/**
+ * getPrefixedType
+ * 
+ * Prefixes a type string to make imports easier in the dto file
+ */
 export const getPrefixedType = (type: string, prefix: string = ""): string => {
     if (isTypePrimitive(type)) {
         return type;
@@ -336,6 +346,11 @@ export const getPrefixedType = (type: string, prefix: string = ""): string => {
     return prefix + type;
 };
 
+/**
+ * generatePropertyDefinition
+ * 
+ * Generates the string representation of a property to be included in a dto class
+ */
 export const generatePropertyDefinition = (
     type: TypeDef,
     property: string,
@@ -375,6 +390,11 @@ export const generatePropertyDefinition = (
     return `${propertyName}: ${getPrefixedType(propertyDefinition, typePrefix)}`;
 };
 
+/**
+ * generateAccessMethods
+ * 
+ * Generates getters and setters for dto classes
+ */
 export const generateAccessMethods = (
     type: TypeDef,
     property: string,
@@ -387,11 +407,8 @@ export const generateAccessMethods = (
         );
     }
 
-    const accessorTypeName: string = _.startCase(property).replace(/\s/g, ""),
-        isRequired: boolean =
-            _.findIndex(type.required, (str) => str === property) > -1,
-        getterName: string = `get${accessorTypeName}`,
-        setterName: string = `set${accessorTypeName}`,
+    const isRequired: boolean =
+        _.findIndex(type.required, (str) => str === property) > -1,
         typeString: string = type.definition[property];
 
     let outType: string = typeString,
@@ -412,11 +429,12 @@ export const generateAccessMethods = (
         outType = `${typePrefix}NonEmptyArray<${outType.replace("[]", "")}>`;
     }
     return `
-        ${setterName} = (value: ${outType}): void => {
-            this.${property} = value;
+        set ${property}(value: ${outType}) {
+            this._${property} = value;
         }
-        ${getterName} = (formatted: boolean = false): ${outType} => {
-            return this.${property};
+
+        get ${property}(): ${outType} {
+            return this._${property};
         }
     `;
 };

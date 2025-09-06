@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import _ from "lodash";
 import { Generator } from "../generators/generator";
 import { TypeGenerator } from "../generators/type-generator";
@@ -15,6 +14,8 @@ import {
 import { combine } from "../util/combiner";
 import SwaggerParser from "@apidevtools/swagger-parser";
 import { execSync } from "node:child_process";
+import path from 'node:path';
+import fs from 'node:fs';
 
 const generators: Record<string, typeof Generator> = {
     types: TypeGenerator, // always has to be first
@@ -41,8 +42,14 @@ export class Processor implements ProcessorInterface {
             if (!fs.existsSync(directory)) {
                 throw new Error("Directory specified for api does not exist");
             }
-            combine(directory, output);
-            apiFile = output;
+            const combinedApiFile = path.resolve(process.cwd(), 'api.yaml');
+            const combinedApiYaml = combine(directory);
+            fs.writeFileSync(
+                path.resolve(process.cwd(), combinedApiFile),
+                combinedApiYaml
+            );
+
+            apiFile = combinedApiFile;
         } else if (api) {
             if (!fs.existsSync(api)) {
                 throw new Error("File specified for api does not exist");
@@ -105,9 +112,10 @@ export class Processor implements ProcessorInterface {
             const generator = new generators[generatorKey](
                 this.schema,
                 this.context,
-            ),
-                generatedContent = content[generatorKey],
-                targetLocation = generator.getTargetLocation();
+            );
+
+            const generatedContent = content[generatorKey],
+                targetLocation = this.options.output;
 
             if (!fs.existsSync(targetLocation)) {
                 fs.mkdirSync(targetLocation, { recursive: true });
@@ -136,8 +144,7 @@ export class Processor implements ProcessorInterface {
 
     format = () => {
         console.log("Running Prettier...");
-        const dir = process.cwd() + "/generated";
-        execSync("npx prettier --write " + dir);
+        execSync(`npx prettier --write ${this.options.output}`);
         console.log("Generation Complete!");
     };
 }

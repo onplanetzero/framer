@@ -11,7 +11,6 @@ import { GeneratorTarget, type GeneratorInterface } from "../core/types";
 export class DTOGenerator extends Generator implements GeneratorInterface {
     name = "dto";
     target = GeneratorTarget.SingleFile;
-    targetLocation = path.resolve(process.cwd(), "./generated");
     targetName = "dto.ts";
 
     generate = () => {
@@ -48,18 +47,17 @@ export class DTOGenerator extends Generator implements GeneratorInterface {
                 [key: string]: any; // allow for other things here, hence ${type.name}Like
             }
 
-            export class ${type.name}Dto {
-                // properties
-                ${_.map(properties, (property) => `${generatePropertyDefinition(type, property, "generatedTypes.")}`).join(";\n")}
+            export class ${type.name}Dto extends Dto {
+                ${_.map(properties, (property) => `private _${generatePropertyDefinition(type, property, "generatedTypes.")}`).join(";\n")}
                 
                 constructor(obj: ${type.name}Like | undefined) {
-                    if(typeof undefined !== typeof obj) {
-                        this.map(obj!);
-                    }
-                }
+                    super()
 
-                getAccessorMethod = (property: string, accessor: 'get' | 'set') => {
-                    return accessor + property.charAt(0).toUpperCase() + property.slice(1);
+                    if(obj === undefined) {
+                        return;
+                    }
+                    
+                    this.map(obj);
                 }
 
                 map = (obj: ${type.name}Like): void => {
@@ -68,11 +66,10 @@ export class DTOGenerator extends Generator implements GeneratorInterface {
                             continue;
                         }
 
-                        this[this.getAccessorMethod(property, 'set')](obj[property]);
+                        this[property as keyof ${type.name}Dto] = obj[property];
                     }
                 }
 
-                // accessor methods
                 ${_.map(properties, (property) => `${generateAccessMethods(type, property, "generatedTypes.")}`).join("\n")}
             }
             `;

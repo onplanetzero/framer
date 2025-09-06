@@ -21,6 +21,7 @@ import {
     type Schema,
     type ResponsesObject,
     type ResponseObject,
+    type RequestBodyObject,
     type TypeDef,
     SupportedDataFormat,
     type GeneratorInterface,
@@ -29,7 +30,6 @@ import {
 export class TypeGenerator extends Generator implements GeneratorInterface {
     name = "types";
     target = GeneratorTarget.SingleFile;
-    targetLocation = path.resolve(process.cwd(), "./generated");
     targetName = "types.ts";
 
     addContext = (): ProcessorContext => {
@@ -42,7 +42,9 @@ export class TypeGenerator extends Generator implements GeneratorInterface {
             stringifiedTypes: LookupTypes = {},
             operations: Record<string, OperationObject> = {},
             responses: Record<string, Schema> = {},
-            decoratedResponseTypes: Record<string, Schema> = {};
+            decoratedResponseTypes: Record<string, Schema> = {},
+            requestBodies: Record<string, Schema> = {},
+            decoratedRequestBodies: Record<string, Schema> = {};
 
         const topLevelSchemaKeys: string[] = _.keys(schemas);
         _.map(topLevelSchemaKeys, (schemaName) => {
@@ -66,6 +68,36 @@ export class TypeGenerator extends Generator implements GeneratorInterface {
             for (const method in path) {
                 const operation: OperationObject = path[method],
                     operationResponses: ResponsesObject = operation.responses;
+
+                // TODO rewrite this to suck less
+                if (operation.requestBody !== undefined) {
+                    const requestBody: RequestBodyObject = <RequestBodyObject>operation.requestBody;
+                    if (requestBody.content !== undefined) {
+                        const content = requestBody.content;
+
+                        if (content[SupportedDataFormat.json] !== undefined) {
+                            const mediaObject = content[SupportedDataFormat.json];
+
+                            if (mediaObject.schema !== undefined) {
+                                const schemaIndex: number = _.findIndex(
+                                    stringifiedTypeSchemas,
+                                    (str) => str === JSON.stringify(mediaObject.schema),
+                                );
+                                if (schemaIndex > -1) {
+                                    const foundSchemaDef: Schema = mediaObject.schema;
+                                    requestBodies[stringifiedTypeSchemaNames[schemaIndex]] =
+                                        foundSchemaDef;
+                                    decoratedRequestBodies[
+                                        stringifiedTypeSchemaNames[schemaIndex]
+                                    ] = decorateWithLookupTypes(
+                                        foundSchemaDef,
+                                        stringifiedTypes,
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
 
                 for (const statusCode in operationResponses) {
                     const response: ResponseObject =
@@ -116,6 +148,17 @@ export class TypeGenerator extends Generator implements GeneratorInterface {
             });
         });
 
+        _.forOwn(decoratedRequestBodies, (model, name) => {
+            const generatedRequestBodyTypes: TypeDef[] = getTypesFromSchema(
+                name,
+                model,
+            );
+
+            _.map(generatedRequestBodyTypes, (type: TypeDef): void => {
+                typeDefinitions[type.name] = type;
+            });
+        });
+
         return {
             operations,
             responses,
@@ -123,6 +166,8 @@ export class TypeGenerator extends Generator implements GeneratorInterface {
             stringifiedTypes,
             decoratedResponseTypes,
             typeDefinitions,
+            requestBodies,
+            decoratedRequestBodies
         } satisfies ProcessorContext;
     };
 

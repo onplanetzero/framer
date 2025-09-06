@@ -8,7 +8,6 @@ import { GeneratorTarget, type GeneratorInterface, type Schema } from "../core/t
 export class DTOMockerGenerator extends Generator implements GeneratorInterface {
     name = "dto-mocker";
     target = GeneratorTarget.SingleFile;
-    targetLocation = path.resolve(process.cwd(), "./generated");
     targetName = "dto-mocker.ts";
 
     generate = () => {
