@@ -1,5 +1,4 @@
 import { Generator } from "./generator";
-import path from "path";
 import _ from "lodash";
 import { writeFileHeader } from "../util/file";
 import {
