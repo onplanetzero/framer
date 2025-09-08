@@ -1,6 +1,14 @@
+
 dist
 node_modules
 generated
 examples/*/generated
 tests/generated
 coverage
+
+*.cache
+.#*
+.fseventsd
+.Trashes
+*.DS_Store
+*.swp
