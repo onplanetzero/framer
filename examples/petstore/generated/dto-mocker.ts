@@ -87,7 +87,7 @@ export const createOrderFactory = (overrides: Partial<Order> = {}): OrderDto =>
         id: faker.number.int({ min: 100, max: 999 }),
         petId: faker.number.int({ min: 1 }),
         quantity: faker.number.int({ min: 1 }),
-        shipDate: faker.date.anytime(),
+        shipDate: faker.date.anytime().toISOString(),
         status: faker.helpers.enumValue(StatusEnum),
         complete: faker.datatype.boolean(),
         ...overrides,
