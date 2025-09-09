@@ -36,14 +36,14 @@ export const createPetFactory = (overrides: Partial<Pet> = {}): PetDto =>
     new PetDto({
         id: faker.number.int({ min: 100, max: 999 }),
         name: faker.lorem.words({ min: 1, max: 3 }),
-        category: createPetFactory(),
+        category: createCategoryFactory(),
         photoUrls: Array.from(
             { length: faker.number.int({ min: 1, max: 10 }) },
             () => faker.lorem.words({ min: 1, max: 3 }),
         ) as NonEmptyArray<string>,
         tags: Array.from(
             { length: faker.number.int({ min: 1, max: 10 }) },
-            () => createPetFactory(),
+            () => createTagFactory(),
         ),
         status: faker.helpers.enumValue(StatusEnum),
         ...overrides,

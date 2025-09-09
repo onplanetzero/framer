@@ -47,9 +47,10 @@ export class DTOGenerator extends Generator implements GeneratorInterface {
             }
 
             export class ${type.name}Dto extends Dto {
+                private _dto_properties: string[] = [${_.map(properties, prop => `'${prop}'`).join(',')}];
                 ${_.map(properties, (property) => `private _${generatePropertyDefinition(type, property, "generatedTypes.")}`).join(";\n")}
                 
-                constructor(obj: ${type.name}Like | undefined) {
+                constructor(obj?: ${type.name}Like) {
                     super()
 
                     if(obj === undefined) {
@@ -60,12 +61,12 @@ export class DTOGenerator extends Generator implements GeneratorInterface {
                 }
 
                 map = (obj: ${type.name}Like): void => {
-                    for(const property in Object.getOwnPropertyNames(this)) {
+                    for(const property in this._dto_properties) {
                         if(typeof undefined == typeof obj[property] || null === obj[property]) {
                             continue;
                         }
 
-                        this[property as keyof ${type.name}Dto] = obj[property];
+                        this[property] = obj[property];
                     }
                 }
 

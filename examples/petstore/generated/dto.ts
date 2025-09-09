@@ -30,6 +30,14 @@ interface PetLike extends generatedTypes.Pet {
 }
 
 export class PetDto extends Dto {
+    private _dto_properties: string[] = [
+        "id",
+        "name",
+        "category",
+        "photoUrls",
+        "tags",
+        "status",
+    ];
     private _id?: number;
     private _name: string;
     private _category: generatedTypes.Category | null | undefined;
@@ -37,7 +45,7 @@ export class PetDto extends Dto {
     private _tags: generatedTypes.Tag[];
     private _status: generatedTypes.StatusEnum | null | undefined;
 
-    constructor(obj: PetLike | undefined) {
+    constructor(obj?: PetLike) {
         super();
 
         if (obj === undefined) {
@@ -48,7 +56,7 @@ export class PetDto extends Dto {
     }
 
     map = (obj: PetLike): void => {
-        for (const property in Object.getOwnPropertyNames(this)) {
+        for (const property in this._dto_properties) {
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
@@ -56,7 +64,7 @@ export class PetDto extends Dto {
                 continue;
             }
 
-            this[property as keyof PetDto] = obj[property];
+            this[property] = obj[property];
         }
     };
 
@@ -119,10 +127,11 @@ interface CategoryLike extends generatedTypes.Category {
 }
 
 export class CategoryDto extends Dto {
+    private _dto_properties: string[] = ["id", "name"];
     private _id?: number;
     private _name?: string;
 
-    constructor(obj: CategoryLike | undefined) {
+    constructor(obj?: CategoryLike) {
         super();
 
         if (obj === undefined) {
@@ -133,7 +142,7 @@ export class CategoryDto extends Dto {
     }
 
     map = (obj: CategoryLike): void => {
-        for (const property in Object.getOwnPropertyNames(this)) {
+        for (const property in this._dto_properties) {
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
@@ -141,7 +150,7 @@ export class CategoryDto extends Dto {
                 continue;
             }
 
-            this[property as keyof CategoryDto] = obj[property];
+            this[property] = obj[property];
         }
     };
 
@@ -172,10 +181,11 @@ interface TagLike extends generatedTypes.Tag {
 }
 
 export class TagDto extends Dto {
+    private _dto_properties: string[] = ["id", "name"];
     private _id?: number;
     private _name?: string;
 
-    constructor(obj: TagLike | undefined) {
+    constructor(obj?: TagLike) {
         super();
 
         if (obj === undefined) {
@@ -186,7 +196,7 @@ export class TagDto extends Dto {
     }
 
     map = (obj: TagLike): void => {
-        for (const property in Object.getOwnPropertyNames(this)) {
+        for (const property in this._dto_properties) {
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
@@ -194,7 +204,7 @@ export class TagDto extends Dto {
                 continue;
             }
 
-            this[property as keyof TagDto] = obj[property];
+            this[property] = obj[property];
         }
     };
 
@@ -225,10 +235,11 @@ interface ErrorLike extends generatedTypes.Error {
 }
 
 export class ErrorDto extends Dto {
+    private _dto_properties: string[] = ["code", "message"];
     private _code: string;
     private _message: string;
 
-    constructor(obj: ErrorLike | undefined) {
+    constructor(obj?: ErrorLike) {
         super();
 
         if (obj === undefined) {
@@ -239,7 +250,7 @@ export class ErrorDto extends Dto {
     }
 
     map = (obj: ErrorLike): void => {
-        for (const property in Object.getOwnPropertyNames(this)) {
+        for (const property in this._dto_properties) {
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
@@ -247,7 +258,7 @@ export class ErrorDto extends Dto {
                 continue;
             }
 
-            this[property as keyof ErrorDto] = obj[property];
+            this[property] = obj[property];
         }
     };
 
@@ -278,11 +289,12 @@ interface ApiResponseLike extends generatedTypes.ApiResponse {
 }
 
 export class ApiResponseDto extends Dto {
+    private _dto_properties: string[] = ["code", "type", "message"];
     private _code?: number;
     private _type?: string;
     private _message?: string;
 
-    constructor(obj: ApiResponseLike | undefined) {
+    constructor(obj?: ApiResponseLike) {
         super();
 
         if (obj === undefined) {
@@ -293,7 +305,7 @@ export class ApiResponseDto extends Dto {
     }
 
     map = (obj: ApiResponseLike): void => {
-        for (const property in Object.getOwnPropertyNames(this)) {
+        for (const property in this._dto_properties) {
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
@@ -301,7 +313,7 @@ export class ApiResponseDto extends Dto {
                 continue;
             }
 
-            this[property as keyof ApiResponseDto] = obj[property];
+            this[property] = obj[property];
         }
     };
 
@@ -340,6 +352,14 @@ interface OrderLike extends generatedTypes.Order {
 }
 
 export class OrderDto extends Dto {
+    private _dto_properties: string[] = [
+        "id",
+        "petId",
+        "quantity",
+        "shipDate",
+        "status",
+        "complete",
+    ];
     private _id?: number;
     private _petId?: number;
     private _quantity?: number;
@@ -347,7 +367,7 @@ export class OrderDto extends Dto {
     private _status: generatedTypes.StatusEnum | null | undefined;
     private _complete?: boolean;
 
-    constructor(obj: OrderLike | undefined) {
+    constructor(obj?: OrderLike) {
         super();
 
         if (obj === undefined) {
@@ -358,7 +378,7 @@ export class OrderDto extends Dto {
     }
 
     map = (obj: OrderLike): void => {
-        for (const property in Object.getOwnPropertyNames(this)) {
+        for (const property in this._dto_properties) {
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
@@ -366,7 +386,7 @@ export class OrderDto extends Dto {
                 continue;
             }
 
-            this[property as keyof OrderDto] = obj[property];
+            this[property] = obj[property];
         }
     };
 
@@ -429,6 +449,16 @@ interface UserLike extends generatedTypes.User {
 }
 
 export class UserDto extends Dto {
+    private _dto_properties: string[] = [
+        "id",
+        "username",
+        "firstName",
+        "lastName",
+        "email",
+        "password",
+        "phone",
+        "userStatus",
+    ];
     private _id?: number;
     private _username?: string;
     private _firstName?: string;
@@ -438,7 +468,7 @@ export class UserDto extends Dto {
     private _phone?: string;
     private _userStatus?: number;
 
-    constructor(obj: UserLike | undefined) {
+    constructor(obj?: UserLike) {
         super();
 
         if (obj === undefined) {
@@ -449,7 +479,7 @@ export class UserDto extends Dto {
     }
 
     map = (obj: UserLike): void => {
-        for (const property in Object.getOwnPropertyNames(this)) {
+        for (const property in this._dto_properties) {
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
@@ -457,7 +487,7 @@ export class UserDto extends Dto {
                 continue;
             }
 
-            this[property as keyof UserDto] = obj[property];
+            this[property] = obj[property];
         }
     };
 

@@ -74,8 +74,9 @@ export const mockStringValue = (schema: Schema) => {
         case "token":
             return "faker.internet.jwt()";
         case "date":
+            return "faker.date.anytime().split('T')[0]"
         case "date-time":
-            return "faker.date.anytime()";
+            return "faker.date.anytime().toISOString()";
         default:
             return "faker.lorem.words({ min: 1, max: 3 })";
     }

@@ -2,7 +2,7 @@ import { Generator } from "./generator";
 import _ from "lodash";
 import { writeFileHeader } from "../util/file";
 import { getPropertyMock } from "../util/mock";
-import { GeneratorTarget, type GeneratorInterface, type Schema } from "../core/types";
+import { GeneratorTarget, type GeneratorInterface, type Schema, type TypeDef } from "../core/types";
 
 export class DTOMockerGenerator extends Generator implements GeneratorInterface {
     name = "dto-mocker";
@@ -34,7 +34,7 @@ export class DTOMockerGenerator extends Generator implements GeneratorInterface 
         
         `;
 
-        _.map(typeDefinitions, (type) => {
+        _.forOwn(typeDefinitions, (type) => {
             const properties = _.keys(type.definition),
                 schema = types[type.name];
             if (!properties.length || schema.properties === undefined) {
@@ -44,7 +44,17 @@ export class DTOMockerGenerator extends Generator implements GeneratorInterface 
             const schemaProperties: Schema = schema.properties;
             generated += `
                 export const create${type.name}Factory = (overrides: Partial<${type.name}> = {}): ${type.name}Dto => new ${type.name}Dto({
-                    ${_.map(properties, (property) => getPropertyMock(property, type, schemaProperties[property])).join(",")},
+            `;
+            const propertyMocks = _.map(properties, (property: string) => {
+                const propertySchema: Schema = schemaProperties[property],
+                    propertyDefinition: string = type.definition[property].replace('[]', ''),
+                    propertyTypeDef: TypeDef = typeDefinitions[propertyDefinition] ?? type;
+
+                return getPropertyMock(property, propertyTypeDef, propertySchema);
+            }).join(',');
+
+            generated += `
+                    ${propertyMocks},
                     ...overrides
                 });
             `;

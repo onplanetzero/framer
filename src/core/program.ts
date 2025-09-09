@@ -1,4 +1,5 @@
-import commander, { type Command } from "commander";
+import * as commander from "commander";
+import { type Command } from "commander";
 import { Processor } from "./processor";
 import {
     type ProcessorInterface,
