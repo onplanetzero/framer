@@ -5,6 +5,7 @@ import {
     type Document,
     type GeneratedContent,
 } from "./types";
+import { banner } from '../util/banner';
 
 export const makeCli = (options?: {
     exitOverride?: boolean;
@@ -21,7 +22,7 @@ export const makeCli = (options?: {
         .version("0.0.1")
         .option(
             "-a, --api <file>",
-            "The yaml file(s) being used for generation",
+            "The yaml file being used for generation",
         )
         .option(
             "-d, --directory <directory>",
@@ -32,6 +33,7 @@ export const makeCli = (options?: {
             "The output combined yaml file if using the directory option",
         )
         .action(async (options) => {
+            banner();
             const processor: ProcessorInterface = new Processor(options);
 
             const api: Awaited<Promise<Document>> = await processor.parse();
