@@ -56,7 +56,8 @@ export class PetDto extends Dto {
     }
 
     map = (obj: PetLike): void => {
-        for (const property in this._dto_properties) {
+        for (const i in this._dto_properties) {
+            const property = this._dto_properties[i];
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
@@ -142,7 +143,8 @@ export class CategoryDto extends Dto {
     }
 
     map = (obj: CategoryLike): void => {
-        for (const property in this._dto_properties) {
+        for (const i in this._dto_properties) {
+            const property = this._dto_properties[i];
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
@@ -196,7 +198,8 @@ export class TagDto extends Dto {
     }
 
     map = (obj: TagLike): void => {
-        for (const property in this._dto_properties) {
+        for (const i in this._dto_properties) {
+            const property = this._dto_properties[i];
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
@@ -250,7 +253,8 @@ export class ErrorDto extends Dto {
     }
 
     map = (obj: ErrorLike): void => {
-        for (const property in this._dto_properties) {
+        for (const i in this._dto_properties) {
+            const property = this._dto_properties[i];
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
@@ -305,7 +309,8 @@ export class ApiResponseDto extends Dto {
     }
 
     map = (obj: ApiResponseLike): void => {
-        for (const property in this._dto_properties) {
+        for (const i in this._dto_properties) {
+            const property = this._dto_properties[i];
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
@@ -378,7 +383,8 @@ export class OrderDto extends Dto {
     }
 
     map = (obj: OrderLike): void => {
-        for (const property in this._dto_properties) {
+        for (const i in this._dto_properties) {
+            const property = this._dto_properties[i];
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
@@ -479,7 +485,8 @@ export class UserDto extends Dto {
     }
 
     map = (obj: UserLike): void => {
-        for (const property in this._dto_properties) {
+        for (const i in this._dto_properties) {
+            const property = this._dto_properties[i];
             if (
                 typeof undefined == typeof obj[property] ||
                 null === obj[property]
