@@ -61,7 +61,8 @@ export class DTOGenerator extends Generator implements GeneratorInterface {
                 }
 
                 map = (obj: ${type.name}Like): void => {
-                    for(const property in this._dto_properties) {
+                    for(const i in this._dto_properties) {
+                        const property = this._dto_properties[i];
                         if(typeof undefined == typeof obj[property] || null === obj[property]) {
                             continue;
                         }

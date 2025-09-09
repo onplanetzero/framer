@@ -6,6 +6,8 @@ test('dto is mappable', () => {
     const fakePet: Pet = createPetFactory(),
         pet: PetDto = new PetDto();
 
+    console.log(fakePet);
+
     pet.map(fakePet);
 
     expect(pet.id).toEqual(fakePet.id);
